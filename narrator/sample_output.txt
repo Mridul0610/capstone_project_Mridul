@@ -1,0 +1,24 @@
+SCR NARRATIVE
+======================================================================
+
+Situation
+Mamaearth's regional operations and finance teams recorded a raw total revenue of ₹99860.00, which after reconciliation adjustments resulted in a clean total revenue of ₹97358.30, reflecting a duplicate reconciliation delta of ₹2501.90. Analysis of sales performance over time established the true peak month as March 2026, generating a revenue of ₹20318.90.
+
+Complication
+Operational efficiency was impacted by return rates varying significantly across payment methods, with COD at 44.4%, UPI at 18.9%, and CARD at 14.7%. Furthermore, the highest-risk segment was identified within Tier 2 cities using the COD payment method, exhibiting an alarmingly high return rate of 54.5%. Revenue tracking was also distorted by anomalies, notably in January 2026, which showed an apparent revenue of ₹29582.10 that required downward correction to a true corrected revenue of ₹11637.10.
+
+Resolution
+To protect regional margins and address the primary drivers of financial leakage, operations and finance must focus on mitigating the high-risk Tier 2 city COD segment, which drives the highest return rate of 54.5%. Future reporting and forecasting will rely strictly on the reconciled clean total revenue of ₹97358.30 and
+
+======================================================================
+TASK 5 - NUMERIC ACCURACY CHECK
+======================================================================
+
+PASS - Cleaned total revenue: 97358.30
+PASS - COD return rate: 44.4
+PASS - COD + Tier-2 return rate: 54.5
+PASS - Duplicate reconciliation delta: 2501.90
+PASS - True peak month: march
+PASS - True peak revenue: 20318.90
+
+TASK 5: PASS
