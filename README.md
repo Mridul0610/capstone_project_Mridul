@@ -61,7 +61,7 @@ This script reads the original CSV files, cleans the data, handles missing value
 
 It generates two important outputs:
 
-orders_merged_clean.csv — contains the cleaned orders merged with product and customer information, including calculated order values and outlier flags. The file is used by visualize.py as the input for creating visualizations.
+orders_merged_clean.csv — contains the cleaned orders merged with product and customer information, including calculated order values and outlier flags. The file is used by visualize.py as the input for creating visualizations. This csv is saved to the data folder
 
 narrator/findings.json — stores the verified business metrics from the analysis, including revenue reconciliation, return rates, the highest-risk customer segment, and monthly revenue findings. The narrator uses this file to generate the SCR business narrative.
 
