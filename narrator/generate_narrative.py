@@ -522,37 +522,6 @@ if __name__ == "__main__":
                 else "FAIL"
             )
 
-        print(
-            "\nSample output saved to sample_output.txt"
-        )
-
-
-        # ====================================================
-        # CHECK SAVED SAMPLE
-        # ====================================================
-
-        with open(
-            "sample_output.txt",
-            "r",
-            encoding="utf-8"
-        ) as f:
-
-            saved_narrative = f.read()
-
-        print(
-            "\n" + "=" * 70
-        )
-        print(
-            "CHECKING SAVED sample_output.txt"
-        )
-        print(
-            "=" * 70
-        )
-
-        check_numeric_accuracy(
-            saved_narrative
-        )
-
 
     else:
 
