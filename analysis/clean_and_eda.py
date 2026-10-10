@@ -503,26 +503,23 @@ print(
     "flagged in Task 6 before performing the time-series analysis."
 )
 
+orders_merged.to_csv('orders_merged_clean.csv', index=False)
+
 """# Findings.json"""
 
 # ============================================================
 # NARRATOR - TASK 1
-# Generate findings.json from verified Part 1 + Part 2 data
+# Generate findings.json using EDA variables
 # ============================================================
 
 import json
-import os
 
 print("\n" + "=" * 70)
 print("NARRATOR - TASK 1: EXPORT VERIFIED FINDINGS")
 print("=" * 70)
 
 
-# ------------------------------------------------------------
 # 1. Raw total revenue
-# ------------------------------------------------------------
-
-# Calculate raw order value using original orders
 raw_orders = orders.merge(
     products[['product_id', 'price']],
     on='product_id',
@@ -538,193 +535,91 @@ raw_orders['order_value'] = (
 raw_total_revenue = raw_orders['order_value'].sum()
 
 
-# ------------------------------------------------------------
-# 2. Cleaned total revenue
-# ------------------------------------------------------------
+# 2. Reuse EDA variables
+cleaned_total_revenue = cleaned_total
 
-# Already calculated earlier in Task 5
-cleaned_total_revenue = orders_merged['order_value'].sum()
+duplicate_reconciliation_delta = dropped_total
 
-
-# ------------------------------------------------------------
-# 3. Duplicate reconciliation delta
-# ------------------------------------------------------------
-
-duplicate_reconciliation_delta = (
-    raw_total_revenue - cleaned_total_revenue
-)
+return_rates = return_rate['return_rate_pct']
 
 
-# ------------------------------------------------------------
-# 4. Return rate by payment method
-# ------------------------------------------------------------
-
-return_rates = (
-    orders_merged
-    .groupby('payment_method')['returned']
-    .mean()
-    .mul(100)
-)
-
-
-# ------------------------------------------------------------
-# 5. Highest-risk payment + city-tier segment
-# ------------------------------------------------------------
-
+# 3. Highest-risk segment
 highest_risk_idx = (
-    segment_return_rate['return_rate_pct']
-    .idxmax()
+    segment_return_rate['return_rate_pct'].idxmax()
 )
 
 highest_risk_rate = (
-    segment_return_rate['return_rate_pct']
-    .max()
+    segment_return_rate['return_rate_pct'].max()
 )
 
 
-# ------------------------------------------------------------
-# 6. Monthly revenue including outliers
-# ------------------------------------------------------------
+# 4. Monthly revenue
+monthly_revenue_all = monthly_with_outliers
 
-orders_merged['order_date'] = pd.to_datetime(
-    orders_merged['order_date'],format='%d-%m-%Y'
-)
-
-orders_merged['year_month'] = (
-    orders_merged['order_date']
-    .dt.to_period('M')
-)
-
-monthly_revenue_all = (
-    orders_merged
-    .groupby('year_month')['order_value']
-    .sum()
-)
+monthly_revenue_corrected = monthly_without_outliers
 
 
-# ------------------------------------------------------------
-# 7. Monthly revenue excluding outliers
-# ------------------------------------------------------------
-
-monthly_revenue_corrected = (
-    orders_merged[
-        ~orders_merged['is_outlier']
-    ]
-    .groupby('year_month')['order_value']
-    .sum()
-)
+# 5. True peak month
+true_peak_month = monthly_revenue_corrected.idxmax()
+true_peak_revenue = monthly_revenue_corrected.max()
 
 
-# True peak month after removing outliers
-true_peak_month = (
-    monthly_revenue_corrected.idxmax()
-)
+# 6. Outlier-inflated month
+outlier_inflated_month = monthly_revenue_all.idxmax()
 
-true_peak_revenue = (
-    monthly_revenue_corrected.max()
-)
+apparent_revenue = monthly_revenue_all.max()
 
-
-# Outlier-inflated month
-outlier_inflated_month = (
-    monthly_revenue_all.idxmax()
-)
-
-apparent_revenue = (
-    monthly_revenue_all.max()
-)
-
-corrected_revenue = (
-    monthly_revenue_corrected.loc[
-        outlier_inflated_month
-    ]
-)
+corrected_revenue = monthly_revenue_corrected.loc[
+    outlier_inflated_month
+]
 
 
-# ------------------------------------------------------------
-# 8. Create findings dictionary
-# ------------------------------------------------------------
-
+# 7. Create findings dictionary
 findings = {
     "cleaned_total_revenue_inr": round(
-        cleaned_total_revenue, 2
+        float(cleaned_total_revenue), 2
     ),
 
     "raw_total_revenue_inr": round(
-        raw_total_revenue
+        float(raw_total_revenue), 2
     ),
 
     "duplicate_reconciliation_delta_inr": round(
-        duplicate_reconciliation_delta, 2
+        float(duplicate_reconciliation_delta), 2
     ),
 
     "return_rate_by_payment": {
-        "COD": round(return_rates["COD"], 1),
-        "CARD": round(return_rates["CARD"], 1),
-        "UPI": round(return_rates["UPI"], 1)
+        "COD": round(float(return_rates["COD"]), 1),
+        "CARD": round(float(return_rates["CARD"]), 1),
+        "UPI": round(float(return_rates["UPI"]), 1)
     },
 
     "highest_risk_segment": {
         "payment_method": highest_risk_idx[0],
         "city_tier": int(highest_risk_idx[1]),
-        "return_rate_pct": round(
-            highest_risk_rate, 1
-        )
+        "return_rate_pct": round(float(highest_risk_rate), 1)
     },
 
     "true_peak_month": {
         "month": str(true_peak_month),
-        "revenue_inr": round(
-            true_peak_revenue, 2
-        )
+        "revenue_inr": round(float(true_peak_revenue), 2)
     },
 
     "outlier_inflated_month": {
         "month": str(outlier_inflated_month),
-        "apparent_revenue_inr": round(
-            apparent_revenue, 2
-        ),
-        "corrected_revenue_inr":
-            corrected_revenue
+        "apparent_revenue_inr": round(float(apparent_revenue), 2),
+        "corrected_revenue_inr": round(float(corrected_revenue), 2)
     }
 }
 
 
+# 8. Write findings.json
+with open('findings.json', 'w', encoding='utf-8') as f:
+    json.dump(findings, f, indent=2)
 
 
-# ------------------------------------------------------------
-# 9. Write findings.json
-# ------------------------------------------------------------
-
-findings_path = (
-    'findings.json'
-)
-
-with open(
-    findings_path,
-    'w',
-    encoding='utf-8'
-) as f:
-
-    json.dump(
-        findings,
-        f,
-        indent=2
-    )
-
-
-# ------------------------------------------------------------
-# 10. Validate generated JSON
-# ------------------------------------------------------------
-
+# 9. Validate output
 print("\nfindings.json:")
-print(
-    json.dumps(
-        findings,
-        indent=2
-    )
-)
+print(json.dumps(findings, indent=2))
 
-print(
-    "\n✓ findings.json generated successfully."
-)
+print("\n✓ findings.json generated successfully.")
